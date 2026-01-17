@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AgriMart Register</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #f0fdf4, #dcfce7);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* 👈 top align instead of center */
+        min-height: 100vh; /* 👈 use min-height so it can grow */
+        margin: 0;
+        padding: 30px; /* 👈 this adds spacing around box */
+        overflow-y: auto; /* 👈 allow vertical scrolling */
+      }
+
+      .box {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 420px; /* 👈 responsive width */
+      }
+      h2 {
+        text-align: center;
+        color: #15803d;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 500;
+        color: #333;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #15803d;
+        box-shadow: 0 0 4px rgba(21, 128, 61, 0.3);
+      }
+      button {
+        background: #15803d;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-top: 20px;
+        font-weight: 600;
+        transition: 0.2s ease-in-out;
+      }
+      button:hover {
+        background: #166534;
+      }
+      .address-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px 12px;
+        margin-top: 6px;
+      }
+      .toggle-link {
+        text-align: center;
+        margin-top: 15px;
+        color: #15803d;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h2>Register</h2>
+      <!-- Form posts to Express route -->
+      <form action="/user/register" method="POST">
+        <label for="role">Register as:</label>
+        <select id="role" name="role" required>
+          <option value="">-- Select Role --</option>
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+        </select>
+
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="phone">Phone Number:</label>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <input
+            type="text"
+            id="phone"
+            name="phone"
+            required
+            pattern="\d{10}"
+            maxlength="10"
+            placeholder="Enter 10-digit number"
+            title="Please enter exactly 10 digits"
+          />
+        </div>
+
+        <label for="email">Email ID:</label>
+        <input type="email" id="email" name="email" required />
+
+        <label>Address:</label>
+        <div class="address-grid">
+          <input
+            type="text"
+            id="street"
+            name="street"
+            placeholder="Street"
+            required
+          />
+          <input
+            type="text"
+            id="city"
+            name="city"
+            placeholder="City"
+            required
+          />
+          <input
+            type="text"
+            id="state"
+            name="state"
+            placeholder="State"
+            required
+          />
+          <input
+            type="number"
+            id="zip"
+            name="zip"
+            placeholder="ZIP Code"
+            required
+          />
+        </div>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+
+        <button type="submit">Register</button>
+      </form>
+
+      <div class="toggle-link" onclick="window.location.href='/user/login'">
+        Already have an account? Login
+      </div>
+    </div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+
+  // Utility: Create an error message element
+  function addErrorElement(input) {
+    const error = document.createElement("p");
+    error.style.color = "red";
+    error.style.fontSize = "14px";
+    error.style.marginTop = "5px";
+    input.parentNode.appendChild(error);
+    return error;
+  }
+
+  // --- NAME ---
+  const nameInput = document.getElementById("name");
+  const nameError = addErrorElement(nameInput);
+  nameInput.addEventListener("input", () => {
+    const pattern = /^[A-Za-z\s]+$/;
+    if (!pattern.test(nameInput.value.trim()) && nameInput.value !== "") {
+      nameError.textContent = "Name should contain only letters and spaces.";
+      nameInput.style.borderColor = "red";
+    } else {
+      nameError.textContent = "";
+      nameInput.style.borderColor = "";
+    }
+  });
+
+  // --- PHONE ---
+  const phoneInput = document.getElementById("phone");
+  const phoneError = addErrorElement(phoneInput);
+  phoneInput.addEventListener("input", () => {
+    // Remove non-digits while typing
+    phoneInput.value = phoneInput.value.replace(/\D/g, '');
+    if (phoneInput.value.length > 10) phoneInput.value = phoneInput.value.slice(0, 10);
+
+    if (phoneInput.value.length < 10 && phoneInput.value !== "") {
+      phoneError.textContent = "Phone number must be exactly 10 digits.";
+      phoneInput.style.borderColor = "red";
+    } else {
+      phoneError.textContent = "";
+      phoneInput.style.borderColor = "";
+    }
+  });
+
+  // --- ADDRESS FIELDS ---
+  const street = document.getElementById("street");
+  const city = document.getElementById("city");
+  const state = document.getElementById("state");
+  const zip = document.getElementById("zip");
+
+  const streetError = addErrorElement(street);
+  const cityError = addErrorElement(city);
+  const stateError = addErrorElement(state);
+  const zipError = addErrorElement(zip);
+
+  // Street: letters, numbers, commas, spaces
+  street.addEventListener("input", () => {
+    const pattern = /^[A-Za-z0-9\s,.-]+$/;
+    if (!pattern.test(street.value.trim()) && street.value !== "") {
+      streetError.textContent = "Street can include letters, numbers, and commas only.";
+      street.style.borderColor = "red";
+    } else {
+      streetError.textContent = "";
+      street.style.borderColor = "";
+    }
+  });
+
+  // City: only letters and spaces
+  city.addEventListener("input", () => {
+    const pattern = /^[A-Za-z\s]+$/;
+    if (!pattern.test(city.value.trim()) && city.value !== "") {
+      cityError.textContent = "City should contain only letters and spaces.";
+      city.style.borderColor = "red";
+    } else {
+      cityError.textContent = "";
+      city.style.borderColor = "";
+    }
+  });
+
+  // State: only letters and spaces
+  state.addEventListener("input", () => {
+    const pattern = /^[A-Za-z\s]+$/;
+    if (!pattern.test(state.value.trim()) && state.value !== "") {
+      stateError.textContent = "State should contain only letters and spaces.";
+      state.style.borderColor = "red";
+    } else {
+      stateError.textContent = "";
+      state.style.borderColor = "";
+    }
+  });
+
+  // ZIP: exactly 6 digits
+  zip.addEventListener("input", () => {
+    const pattern = /^\d{0,6}$/;
+    zip.value = zip.value.replace(/\D/g, ''); // only digits
+    if (!pattern.test(zip.value.trim())) {
+      zipError.textContent = "ZIP must contain only digits (max 6).";
+      zip.style.borderColor = "red";
+    } else {
+      zipError.textContent = "";
+      zip.style.borderColor = "";
+    }
+  });
+
+  // --- FORM SUBMIT VALIDATION ---
+  form.addEventListener("submit", (e) => {
+    let valid = true;
+
+    function checkField(input, pattern, errorElem, message) {
+      if (!pattern.test(input.value.trim()) || input.value.trim() === "") {
+        errorElem.textContent = message;
+        input.style.borderColor = "red";
+        valid = false;
+      }
+    }
+
+    checkField(nameInput, /^[A-Za-z\s]+$/, nameError, "Enter a valid name.");
+    checkField(phoneInput, /^\d{10}$/, phoneError, "Phone number must be exactly 10 digits.");
+    checkField(street, /^[A-Za-z0-9\s,.-]+$/, streetError, "Enter a valid street address.");
+    checkField(city, /^[A-Za-z\s]+$/, cityError, "Enter a valid city name.");
+    checkField(state, /^[A-Za-z\s]+$/, stateError, "Enter a valid state name.");
+    checkField(zip, /^\d{6}$/, zipError, "ZIP must be exactly 6 digits.");
+
+    if (!valid) e.preventDefault();
+  });
+
+  // --- SERVER ERROR HANDLING (keep existing logic) ---
+  const error = "<%= typeof error !== 'undefined' ? error : '' %>";
+  if (error) {
+    const errorMsg = document.createElement("div");
+    errorMsg.className = "error-msg";
+    errorMsg.textContent = error;
+    document.querySelector(".box").prepend(errorMsg);
+  }
+});
+</script>
+
+
+
+  </body>
+</html>

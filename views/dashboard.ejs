@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AgriMart - Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <%- include("partials/header", { user: user }) %> <% if(user.role ===
+    "buyer"){ %>
+    <div class="search">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="🔍 Search for seeds, tools..."
+      />
+      <div id="searchResults" class="search-results"></div>
+    </div>
+
+    <!-- Popular Products -->
+    <div class="product">
+      <h2>🌟 Popular Products</h2>
+      <div class="popular-products">
+<% popularProducts.forEach(product => { %>
+  <div class="card">
+    <img
+      src="<%= product.image ? product.image.url : 'https://placehold.co/150x100' %>"
+      alt="<%= product.name %>"
+    />
+    <p><%= product.name %> - ₹<%= product.price %></p>
+    <a href="/product/<%= product._id %>" class="button">View</a>
+    <br />
+    
+    <% if (product.status === "Out of Stock") { %>
+      <button disabled style="background: gray; cursor: not-allowed;">
+        Out of Stock
+      </button>
+    <% } else { %>
+      <button onclick="addToCart(<%= JSON.stringify(product) %>)">
+        Add to Cart
+      </button>
+    <% } %>
+  </div>
+<% }) %>
+
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="category">
+      <h2>🛒 Browse Categories</h2>
+      <div class="grid">
+        <div>
+          <img
+            src="https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?_gl=1*1i8t2yn*_ga*MTA5MjAyODQ0Mi4xNzU2MDU4NjUz*_ga_8JE65Q40S6*czE3NTYwNTg2NTIkbzEkZzEkdDE3NTYwNTg2ODAkajMyJGwwJGgw"
+            alt="Vegetables"
+          />
+          <p>Vegetables</p>
+          <button onclick="location.href='vegetables'">See Vegetables</button>
+        </div>
+        <div>
+          <img
+            src="https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?_gl=1*1xxmmfc*_ga*MTA5MjAyODQ0Mi4xNzU2MDU4NjUz*_ga_8JE65Q40S6*czE3NTYwNTg2NTIkbzEkZzEkdDE3NTYwNTg3NTckajMwJGwwJGgw"
+            alt="Fruits"
+          />
+          <p>Fruits</p>
+          <button onclick="location.href='fruits'">See Fruits</button>
+        </div>
+
+        <div>
+          <img
+            src="https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?_gl=1*1xxmmfc*_ga*MTA5MjAyODQ0Mi4xNzU2MDU4NjUz*_ga_8JE65Q40S6*czE3NTYwNTg2NTIkbzEkZzEkdDE3NTYwNTg3NTckajMwJGwwJGgw"
+            alt="Tools"
+          />
+          <p>Tools</p>
+          <button onclick="location.href='Tools'">Tools</button>
+        </div>
+
+        <div>
+          <img
+            src="https://images.pexels.com/photos/69776/tulips-bed-colorful-color-69776.jpeg?_gl=1*om28z6*_ga*MTA5MjAyODQ0Mi4xNzU2MDU4NjUz*_ga_8JE65Q40S6*czE3NTYwNTg2NTIkbzEkZzEkdDE3NTYwNTg4MDgkajM5JGwwJGgw"
+            alt="Flowers"
+          />
+          <p>Flowers</p>
+          <button onclick="location.href='flowers'">See Flowers</button>
+        </div>
+          <div>
+          <img
+            src="F:\new\FertilizerPackaging.png"
+          />
+          <p>Fertilizers</p>
+          <button onclick="location.href='fertilizers'">Fertilizers</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating cart -->
+    <div class="cart-icon" onclick="toggleCartPopup()">
+      🛒 Cart (<span id="cart-count">0</span>)
+    </div>
+
+    <!-- Cart popup -->
+    <div id="cart-popup">
+      <h3>Your Cart</h3>
+      <ul id="cart-items"></ul>
+      <p>
+        <strong>Total: ₹<span id="cart-total">0</span></strong>
+      </p>
+      <div style="margin-top:10px; text-align:center;">
+    <button onclick="window.location.href='/user/cart'" 
+            style="background:green; color:white; padding:6px 12px; border:none; border-radius:4px; cursor:pointer;">
+      Proceed
+    </button>
+  </div>
+      
+    </div>
+    <% } else if (user.role === "seller"){ %>
+    <div class="dashboard">
+      <h2>Welcome, <%= user.name %> 👋</h2>
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <h3>Total Orders</h3>
+          <p><%= orders.length %></p>
+        </div>
+        <div class="stat-card">
+          <% let sales = 0; orders.forEach(order => { if (order.productId &&
+          order.productId.price) { sales += order.productId.price *
+          order.quantity; } }); %>
+          <h3>Total Sales</h3>
+          <p>₹<%= sales %></p>
+        </div>
+      </div>
+
+      <!-- Best Selling Products -->
+      <% if (orders.length > 0) { const grouped = {}; orders.forEach(order => {
+      if (order.productId) { const pid = order.productId._id.toString(); if
+      (!grouped[pid]) { grouped[pid] = { _id: order.productId._id, name:
+      order.productId.name, price: order.productId.price, image:
+      order.productId.image, quantity: 0, total: 0 }; } grouped[pid].quantity +=
+      order.quantity; grouped[pid].total += order.productId.price *
+      order.quantity; } }); const topProducts = Object.values(grouped) .sort((a,
+      b) => b.total - a.total) .slice(0, 3); %>
+
+      <h3>🔥 Best Selling Products</h3>
+      <div class="products-row">
+        <% topProducts.forEach((product, index) => { %>
+        <div class="product-card">
+          <div class="rank-badge"><%= index+1 %></div>
+          <img
+            src="<%= product.image ? product.image.url  : 'https://placehold.co/200x150' %>"
+            alt="<%= product.name %>"
+          />
+          <h4><%= product.name %></h4>
+          <p>Unit Price: ₹<%= product.price %></p>
+          <p>Total Sales: ₹<%= product.total %></p>
+          <a href="/product/<%= product._id %>" class="button">View</a>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Best Selling Products -->
+      <% const topProductsUnit = Object.values(grouped) .sort((a, b) =>
+      b.quantity - a.quantity) .slice(0, 3); %>
+
+      <h3>🔥 Most Selling Products</h3>
+      <div class="products-row">
+        <% topProductsUnit.forEach((product, index) => { %>
+        <div class="product-card">
+          <div class="rank-badge"><%= index+1 %></div>
+          <img
+            src="<%= product.image ? product.image.url  : 'https://placehold.co/200x150' %>"
+            alt="<%= product.name %>"
+          />
+          <h4><%= product.name %></h4>
+          <p>Unit Price: ₹<%= product.price %></p>
+          <p>KG Sold: <%= product.quantity %> kg</p>
+          <a href="/product/<%= product._id %>" class="button">View</a>
+        </div>
+        <% }) %>
+      </div>
+
+      <% } %>
+    </div>
+    <% } %>
+
+    <div class="footer">
+      <!-- Footer -->
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-brand">
+      <h2>AgriMart</h2>
+      <p>Your one-stop shop for seeds, tools, fertilizers, and more!</p>
+    </div>
+
+    <div class="footer-links">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/vegetables">Vegetables</a></li>
+        <li><a href="/fruits">Fruits</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-contact">
+      <h3>Contact Us</h3>
+      <p>Email: support@agrimart.com</p>
+      <p>Phone: +91 98765 43210</p>
+      <div class="social-icons">
+        <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" /></a>
+        <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram" /></a>
+        <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" /></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    © <span id="year"></span> AgriMart | All Rights Reserved
+  </div>
+</footer>
+
+<script>
+  // Set current year dynamically
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+    </div>
+
+    <script>
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      function addToCart(product) {
+        const item = cart.find((i) => i.product.name === product.name);
+        if (item) {
+          item.qty++;
+        } else {
+          cart.push({ product, qty: 1 });
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+      }
+
+      function removeFromCart(index) {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+      }
+
+      function renderCart() {
+        const cartItems = document.getElementById("cart-items");
+        const cartTotal = document.getElementById("cart-total");
+        const cartCount = document.getElementById("cart-count");
+        if (!cartItems || !cartTotal || !cartCount) return;
+
+        cartItems.innerHTML = "";
+        let total = 0;
+        let count = 0;
+
+        cart.forEach((item, index) => {
+          const li = document.createElement("li");
+          li.innerHTML =
+            `${item.product.name} - ₹${item.product.price} x ${item.qty}` +
+            ` <button class="remove-btn" onclick="removeFromCart(${index})">X</button>`;
+          cartItems.appendChild(li);
+          total += item.product.price * item.qty;
+          count += item.qty;
+        });
+
+        cartTotal.textContent = total;
+        cartCount.textContent = count;
+      }
+
+      function toggleCartPopup() {
+        const popup = document.getElementById("cart-popup");
+        if (popup) {
+          popup.style.display =
+            popup.style.display === "none" || popup.style.display === ""
+              ? "block"
+              : "none";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", renderCart);
+      function logout() {
+        localStorage.clear();
+        window.location.href = "login.html";
+      }
+
+      function isCustomer() {
+        return user.role === "buyer";
+      }
+      const searchInput = document.getElementById("searchInput");
+      const searchResults = document.getElementById("searchResults");
+
+      if (searchInput) {
+        searchInput.addEventListener("input", async function () {
+          const query = this.value.trim();
+
+          if (query.length === 0) {
+            searchResults.style.display = "none";
+            return;
+          }
+
+          try {
+            const res = await fetch(
+              `/product/search?q=${encodeURIComponent(query)}`
+            );
+            const products = await res.json();
+
+            if (products.length === 0) {
+              searchResults.innerHTML =
+                "<div style='padding:8px'>No results found</div>";
+              searchResults.style.display = "block";
+              return;
+            }
+
+            searchResults.innerHTML = products
+              .map(
+                (p) => `
+          <div class="search-item">
+            <div class="search-left">
+              <img src="${p.image || "https://placehold.co/40"}" alt="${
+                  p.name
+                }">
+              <div>
+                <div>${p.name}</div>
+                <div>₹${p.price}</div>
+              </div>
+            </div>
+            <div class="search-right">
+              <a href="/product/${p._id}" class="button">View</a>
+              <button onclick='addToCart(${JSON.stringify(p)})'>Add</button>
+            </div>
+          </div>
+        `
+              )
+              .join("");
+
+            searchResults.style.display = "block";
+          } catch (error) {
+            console.error("Search failed", error);
+          }
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+          if (!searchResults.contains(e.target) && e.target !== searchInput) {
+            searchResults.style.display = "none";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

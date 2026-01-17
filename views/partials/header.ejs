@@ -1,0 +1,25 @@
+<header>
+  <h1>AgriMart</h1>
+
+  <% if (user.role === "buyer") { %>
+  <nav>
+    <a href="/user/dashboard">Home</a>
+    <a href="/user/vegetables">Vegetables</a>
+    <a href="/user/fruits">Fruits</a>
+    <a href="/user/flowers">Flowers</a>
+    <a href="/user/Tools">Tools</a>
+    <a href="/user/fertilizers">Fertilizers</a>
+    <a href="/user/cart">Cart</a>
+    <a href="/order/get-orders-buyer">Orders</a>
+    <a href="/user/logout">Logout</a>
+  </nav>
+  <% } %> <% if (user.role === "seller") { %>
+  <nav>
+    <a href="/user/dashboard">Home</a>
+    <a href="/order/get-orders">Orders</a>
+    <a href="/user/my-product">My Product</a>
+    <a href="/user/add-product">Add Product</a>
+    <a href="/user/logout">Logout</a>
+  </nav>
+  <% } %>
+</header>

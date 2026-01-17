@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Add New Seed Product</title>
+
+    <style>
+    body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+  color: #333;
+}
+
+      header {
+  background: green;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+nav a {
+  margin: 0 12px;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+nav a:hover {
+  opacity: 0.8;
+}
+
+      .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 650px;
+        margin: auto;
+        box-shadow: 0 6px 16px #00000026;
+        animation: fadeIn 0.6s ease-in-out;
+      }
+
+      h2 {
+        text-align: center;
+        color: #2e7d32;
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 15px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        background: #fafafa;
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #ddd;
+      }
+
+      th {
+        background: #f1f1f1;
+        text-align: center;
+        color: #555;
+      }
+
+      th,
+      td {
+        padding: 10px;
+      }
+
+      button {
+        background: #2e7d32;
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        margin-top: 20px;
+        cursor: pointer;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: #1b5e20;
+        transform: translateY(-2px);
+      }
+
+      .secondary-btn {
+        background: #0288d1;
+      }
+
+      .secondary-btn:hover {
+        background: #01579b;
+      }
+
+      img {
+        margin-top: 15px;
+        width: 300px;
+        height: 200px;
+        object-fit: cover; /* ✅ ensures all previews look consistent */
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .form-container {
+          padding: 20px;
+        }
+        img {
+          width: 100%;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <% if(!product){ %>
+    <%- include('partials/header') %>
+    <% }  %>
+   <div class="form-container">
+      <h2>🌱 <%= product ? "Edit Seed Product" : "Add New Seed Product" %></h2>
+
+      <form 
+        id="productForm" 
+        enctype="multipart/form-data"
+      >
+        <label>Product Name:</label>
+        <input type="text" name="productName" required value="<%= product ? product.name : '' %>" />
+
+        <label>Description:</label>
+        <textarea name="description" rows="3" required><%= product ? product.description : '' %></textarea>
+
+        <label>Crop Type:</label>
+        <select name="type" required>
+          <option value="vegetable" <%= product && product.type === "vegetable" ? "selected" : "" %>>Vegetable Seeds</option>
+          <option value="fruit" <%= product && product.type === "fruit" ? "selected" : "" %>>Fruit Seeds</option>
+          <option value="flower" <%= product && product.type === "flower" ? "selected" : "" %>>Flower Seeds</option>
+          <option value="Tools" <%= product && product.type === "Tools" ? "selected" : "" %>>Tools</option>
+          <option value="fertilizers" <%= product && product.type === "fertilizers" ? "selected" : "" %>>Fertilizers</option>
+        </select>
+
+        <label>Specifications:</label>
+        <table id="specTable">
+          <tr>
+            <th>Specification</th>
+            <th>Value</th>
+          </tr>
+          <% if (product && product.specification && product.specification.length > 0) { %>
+            <% product.specification.forEach(spec => { %>
+              <tr>
+                <td><input type="text" name="spec[]" value="<%= spec.name %>" /></td>
+                <td><input type="text" name="value[]" value="<%= spec.value %>" /></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td><input type="text" name="spec[]" placeholder="Variety" /></td>
+              <td><input type="text" name="value[]" placeholder="NS 43" /></td>
+            </tr>
+          <% } %>
+        </table>
+        <button type="button" class="secondary-btn" onclick="addSpecRow()">
+          + Add More Row
+        </button>
+
+        <label>Price (₹):</label>
+        <input type="number" name="price" required value="<%= product ? product.price : '' %>" />
+          <label>Product Status:</label>
+  <select name="status" required>
+    <option value="In Stock" <%= product && product.status === "In Stock" ? "selected" : "" %>>In Stock</option>
+    <option value="Out of Stock" <%= product && product.status === "Out of Stock" ? "selected" : "" %>>Out of Stock</option>
+  </select>
+
+
+        <label>Upload Image:</label>
+        <input type="file" name="image" accept="image/*" onchange="previewImage(event)" />
+        <img 
+          id="preview" 
+          src="<%= product && product.image ? product.image.url : 'https://placehold.co/300x200?text=Preview' %>" 
+        />
+
+        <button type="submit">
+          <%= product ? "🔄 Update Product" : "💾 Save Product" %>
+        </button>
+      </form>
+    </div>
+
+    <script>
+      function addSpecRow() {
+        //check if image is present
+        const imageInput = document.getElementById("image");
+        console.log(imageInput);
+        
+
+        const table = document.getElementById("specTable");
+        const row = table.insertRow();
+        row.innerHTML = `
+          <td><input type="text" name="spec[]" placeholder="e.g. Head Shape"></td>
+          <td><input type="text" name="value[]" placeholder="e.g. Round Flat"></td>
+        `;
+      }
+ function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          const img = document.getElementById("preview");
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+      }
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("productForm");
+
+  // Pass product existence safely to JS
+  const isEdit = <%= product ? "true" : "false" %>; 
+  const productId = "<%= product ? product._id : '' %>";
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    // collect specs + values
+    const specs = Array.from(
+      document.querySelectorAll("input[name='spec[]']")
+    ).map((input) => input.value);
+    const values = Array.from(
+      document.querySelectorAll("input[name='value[]']")
+    ).map((input) => input.value);
+
+    // build array of objects
+    const specification = specs.map((spec, i) => ({
+      name: spec,
+      value: values[i],
+    }));
+
+    formData.delete("spec[]");
+    formData.delete("value[]");
+
+    formData.append("specification", JSON.stringify(specification));
+
+    if (!isEdit) {
+      // Add mode
+      fetch("/product/add-product", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          alert("✅ Product added successfully!");
+          form.reset();
+          document.getElementById("preview").src =
+            "https://placehold.co/300x200?text=Preview";
+        })
+        .catch((err) => {
+          console.error("Error adding product:", err);
+          alert("❌ Failed to add product. Please try again.");
+        });
+    } else {
+      // Edit mode
+      formData.append("productId", productId);
+      fetch("/product/update-product", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          alert("✅ Product updated successfully!");
+          window.location.href = "/user/dashboard";
+        })
+        .catch((err) => {
+          console.error("Error updating product:", err);
+          alert("❌ Failed to update product. Please try again.");
+        });
+    }
+  });
+});
+</script>
+  </body>
+</html>

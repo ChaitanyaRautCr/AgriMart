@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Orders - AgriMart</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <%- include("partials/header", { user: user }) %> <% if(orders.length ===
+    0){ %>
+    <div class="no-product">No Orders Available</div>
+    <% } else { %>
+
+    <div class="orders-container">
+      <% orders.forEach(seller => { %>
+      <div class="order-card">
+        <!-- seller Info -->
+        <div class="buyer-info">
+          <h2 class="buyer-name"><%= seller.sellerName %></h2>
+          <p class="buyer-contact">
+            📞 <%= seller.sellerPhone %> | ✉️ <%= seller.sellerEmail %>
+          </p>
+        </div>
+
+        <!-- Address -->
+        <div class="buyer-address">
+          <div><strong>Street:</strong> <%= seller.sellerAddress.street %></div>
+          <div><strong>City:</strong> <%= seller.sellerAddress.city %></div>
+          <div><strong>State:</strong> <%= seller.sellerAddress.state %></div>
+          <div><strong>Zip:</strong> <%= seller.sellerAddress.zip %></div>
+        </div>
+
+        <!-- Products -->
+        <div class="products-box">
+          <h4>🛒 Orders Placed</h4>
+          <% seller.orders.forEach(product => { %>
+          <div class="product-item">
+            <!-- Left: Product info -->
+            <div class="product-info">
+              <%= product.productName %> - ₹<%= product.price %> × <%=
+              product.quantity %>
+            </div>
+
+            <!-- Right: Button + Status together -->
+            <div class="action-group">
+              <% if(product.status === "shipped"){ %>
+              <button
+                class="update-btn"
+                onclick="updateOrder('<%= product.orderId %>')"
+              >
+                Mark as Delivered
+              </button>
+              <% } %>
+              <span class="status-badge <%= product.status %>">
+                <%= product.status %>
+              </span>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+
+        <p class="total">💰 Total Spent: ₹<%= seller.totalSpent %></p>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <script>
+      function updateOrder(orderId) {
+        fetch(`/order/update-order-delivered/${orderId}`, {
+          method: "POST",
+        })
+          .then((res) => res.json())
+          .then((data) => location.reload())
+          .catch((err) => console.error(err));
+      }
+    </script>
+  </body>
+</html>

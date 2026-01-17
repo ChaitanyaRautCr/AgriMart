@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Payment Method</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+        padding: 20px;
+        text-align: center;
+      }
+      .box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 400px;
+        margin: auto;
+        box-shadow: 0 0 5px gray;
+      }
+      h2 {
+        margin-bottom: 15px;
+      }
+      button {
+        margin-top: 15px;
+        background: green;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: darkgreen;
+      }
+      .total {
+        margin-top: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h2>Choose Payment Method</h2>
+      <form onsubmit="placeOrder(event)">
+        <label>
+          <input type="radio" name="payment" value="cod" checked />
+          Cash on Delivery
+        </label>
+
+        <!-- ✅ Display total amount -->
+        <div class="total">
+          Total: ₹<span id="total-amount">0</span>
+        </div>
+
+        <button type="submit">Place Order</button>
+      </form>
+      <p id="msg" style="color:green; font-weight:bold; margin-top:15px;"></p>
+    </div>
+
+    <script>
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      // ✅ Calculate & display total
+      function displayTotal() {
+        let total = 0;
+        cart.forEach((item) => {
+          total += item.product.price * item.qty;
+        });
+        document.getElementById("total-amount").textContent = total;
+      }
+
+      async function placeOrder(e) {
+        e.preventDefault(); // stop form from reloading
+
+        if (cart.length === 0) {
+          alert("Your cart is empty!");
+          return;
+        }
+
+        const products = cart.map((item) => ({
+          productId: item.product._id,
+          quantity: item.qty,
+          sellerId: item.product.sellerId,
+        }));
+
+        try {
+          const res = await fetch("/order/place-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ products }),
+          });
+
+          if (!res.ok) {
+            throw new Error(`Server error: ${res.status}`);
+          }
+
+          const data = await res.json();
+          localStorage.removeItem("cart"); // clear cart
+          cart = [];
+          alert("✅ Order placed successfully!");
+          window.location.href = "/order/get-orders-buyer"; // redirect to orders
+        } catch (err) {
+          console.error("Order placement failed:", err);
+          alert("❌ Failed to place order. Please try again.");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", displayTotal);
+    </script>
+  </body>
+</html>

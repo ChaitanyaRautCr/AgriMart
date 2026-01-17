@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cart - AgriMart</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>AgriMart</h1>
+      <% if (user.role === "buyer") { %>
+      <nav>
+        <a href="/user/dashboard">Home</a>
+        <a href="/user/vegetables">Vegetables</a>
+        <a href="/user/fruits">Fruits</a>
+        <a href="/user/flowers">Flowers</a>
+        <a href="/user/cart">Cart</a>
+        <a href="/order/get-orders-buyer">Orders</a>
+        <a href="/user/logout">Logout</a>
+      </nav>
+      <% } %> <% if (user.role === "seller") { %>
+      <nav>
+        <a href="/user/dashboard">Home</a>
+        <a href="/user/orders">Orders</a>
+        <a href="/user/add-product">Add Product</a>
+        <a href="/user/logout">Logout</a>
+      </nav>
+      <% } %>
+    </header>
+
+    <h2>Your Cart</h2>
+    <div id="cart-container"></div>
+    <div class="summary" id="cart-summary" style="display: none">
+      <p>Total: ₹<span id="cart-total">0</span></p>
+      <a href="/user/payment" class="checkout-btn">Place Order</a>
+
+    </div>
+
+    <script>
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      function saveCart() {
+        localStorage.setItem("cart", JSON.stringify(cart));
+      }
+
+      function renderCart() {
+        const container = document.getElementById("cart-container");
+        const summary = document.getElementById("cart-summary");
+        const totalEl = document.getElementById("cart-total");
+
+        container.innerHTML = "";
+
+        if (cart.length === 0) {
+          container.innerHTML =
+            '<div class="empty">🛒 Your cart is empty</div>';
+          summary.style.display = "none";
+          return;
+        }
+
+        let total = 0;
+
+        cart.forEach((item, index) => {
+          total += item.product.price * item.qty;
+          container.innerHTML += `
+        <div class="cart-item">
+  <div>
+    ${item.product.name}  
+    <span style="color:#666; font-weight:400;">₹${item.product.price}</span>
+  </div>
+  <div class="cart-actions">
+    <button class="minus-btn" onclick="decreaseQty(${index})">-</button>
+    <div class="cart-quantity">${item.qty}</div>
+    <button class="plus-btn" onclick="increaseQty(${index})">+</button>
+    <button class="remove-btn" onclick="removeFromCart(${index})">X</button>
+  </div>
+</div>
+
+          `;
+        });
+
+        totalEl.textContent = total;
+        summary.style.display = "block";
+      }
+
+      function increaseQty(index) {
+        cart[index].qty++;
+        saveCart();
+        renderCart();
+      }
+
+      function decreaseQty(index) {
+        if (cart[index].qty > 1) {
+          cart[index].qty--;
+        } else {
+          cart.splice(index, 1);
+        }
+        saveCart();
+        renderCart();
+      }
+
+      function removeFromCart(index) {
+        cart.splice(index, 1);
+        saveCart();
+        renderCart();
+      }
+
+      async function placeOrder() {
+        if (cart.length === 0) {
+          alert("Your cart is empty!");
+          return;
+        }
+
+        const products = cart.map((item) => ({
+          productId: item.product._id,
+          quantity: item.qty,
+          sellerId: item.product.sellerId,
+        }));
+
+        try {
+          const res = await fetch("/order/place-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ products }),
+          });
+
+          if (!res.ok) {
+            throw new Error(`Server error: ${res.status}`);
+          }
+
+          const data = await res.json(); // 👈 parse JSON
+          localStorage.removeItem("cart"); // clear cart
+          cart = [];
+          renderCart();
+          alert("✅ Order placed successfully!");
+        } catch (err) {
+          console.error("Order placement failed:", err);
+          alert("❌ Failed to place order. Please try again.");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", renderCart);
+    </script>
+  </body>
+</html>

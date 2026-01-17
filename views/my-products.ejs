@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vegetables - AgriMart</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!-- Include reusable header -->
+    <!-- Include reusable header -->
+    <%- include("partials/header", { user: user }) %> <% if(products.length
+    ===0){ %>
+    <div class="no-product">No Products</div>
+    <% } else { %>
+    <div class="grid">
+      <% products.forEach(product => { %>
+      <div class="card">
+        <img
+          src="<%= product.image ? product.image.url : 'https://placehold.co/150x100' %>"
+          alt="<%= product.name %>"
+        />
+        <p><%= product.name %> - ₹<%= product.price %></p>
+        <a href="/product/<%= product._id %>" class="button">View Details</a
+        ><br />
+        <a onclick="deleteProduct('<%= product._id %>')" class="button"
+          >Delete</a
+        ><br />
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <script>
+      function deleteProduct(productId) {
+
+
+        if (confirm("Are you sure you want to delete this product?")) {
+          fetch(`/product/delete-product/${productId}`, {
+            method: "DELETE",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Product deleted successfully");
+                location.reload();
+              } else {
+                alert("Error deleting product: " + data.message);
+              }
+            })
+            .catch((error) => console.error("Error:", error));
+        }
+      }
+    </script>
+  </body>
+</html>

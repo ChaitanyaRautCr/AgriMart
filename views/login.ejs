@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AgriMart Login</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #f0fdf4, #dcfce7);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        margin: 0;
+        padding: 30px;
+        overflow-y: auto;
+      }
+      .box {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 420px;
+      }
+      h2 {
+        text-align: center;
+        color: #15803d;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 500;
+        color: #333;
+      }
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      input:focus {
+        outline: none;
+        border-color: #15803d;
+        box-shadow: 0 0 4px rgba(21, 128, 61, 0.3);
+      }
+      button {
+        background: #15803d;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-top: 20px;
+        font-weight: 600;
+        transition: 0.2s ease-in-out;
+      }
+      button:hover {
+        background: #166534;
+      }
+      .toggle-link {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+      }
+      .toggle-link a {
+        color: #15803d;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .error-msg {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        text-align: center;
+      }
+      .password-wrapper {
+        position: relative;
+      }
+      .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 13px;
+        color: #15803d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box" id="login-box">
+      <h2>Login</h2>
+
+      <form action="/user/login" method="POST">
+        <label for="login-email">Email:</label>
+        <input type="email" id="login-email" name="email" required />
+
+        <label for="login-password">Password:</label>
+        <div class="password-wrapper">
+          <input type="password" id="login-password" name="password" required />
+          <span class="toggle-password" onclick="togglePassword()">👁</span>
+        </div>
+
+        <button type="submit">Login</button>
+      </form>
+
+      <div class="toggle-link">
+        Don’t have an account? <a href="/user/register">Register</a>
+      </div>
+    </div>
+
+    <script>
+      function togglePassword() {
+        const pwd = document.getElementById("login-password");
+        pwd.type = pwd.type === "password" ? "text" : "password";
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        const error = "<%= typeof error !== 'undefined' ? error : '' %>";
+        if (error) {
+          const errorMsg = document.createElement("div");
+          errorMsg.className = "error-msg";
+          errorMsg.textContent = error;
+          document.getElementById("login-box").prepend(errorMsg);
+        }
+      });
+    </script>
+  </body>
+</html>
+ 
