@@ -10,33 +10,40 @@ orderRouter.post(
   "/place-order",
   isAuthenticated,
   isCustomer,
-  orderCtrl.placeOrders
+  orderCtrl.placeOrders,
 );
 
 orderRouter.get(
   "/get-orders",
   isAuthenticated,
   isRetailer,
-  orderCtrl.getOrders
+  orderCtrl.getOrders,
 );
 
 orderRouter.get(
   "/get-orders-buyer",
   isAuthenticated,
   isCustomer,
-  orderCtrl.getOrdersBuyer
+  orderCtrl.getOrdersBuyer,
 );
 orderRouter.post(
   "/update-order-shipped/:id",
   isAuthenticated,
   isRetailer,
-  orderCtrl.updateOrderShipped
+  orderCtrl.updateOrderShipped,
 );
 orderRouter.post(
   "/update-order-delivered/:id",
   isAuthenticated,
   isCustomer,
-  orderCtrl.updateOrderDelivered
+  orderCtrl.updateOrderDelivered,
+);
+
+orderRouter.get(
+  "/payment-success",
+  isAuthenticated,
+  isCustomer,
+  orderCtrl.paymentSuccess,
 );
 
 module.exports = orderRouter;
