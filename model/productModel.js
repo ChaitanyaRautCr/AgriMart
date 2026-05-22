@@ -1,30 +1,35 @@
 const mongoose = require("mongoose");
 
-const paymentSchema = new mongoose.Schema({
-  paymentType: {
-    type: String,
-    enum: ["COD", "Online"],
-    required: true,
-  },
-  amount: {
-    type: Number,
-    required: true,
-  },
-  buyerId: {
+const productSchema = new mongoose.Schema({
+  sellerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  status: {
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  description: { type: String, default: "" },
+  type: {
     type: String,
-    enum: ["pending", "completed", "failed", "refunded"],
+    required: true,
+    enum: ["vegetable", "fruit", "flower","Tools","fertilizers"],
   },
-  orders: [
+  specification: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Order",
+      _id: false,
+      name: { type: String },
+      value: { type: String },
     },
   ],
+  image: { type: mongoose.Schema.Types.ObjectId, ref: "Image", default: null },
+
+  status: {
+    type: String,
+    enum: ["In Stock", "Out of Stock"],
+    default: "In Stock",
+  },
 });
 
-module.exports = mongoose.model("Payment", paymentSchema);
+
+module.exports = mongoose.model("Product", productSchema);
+
