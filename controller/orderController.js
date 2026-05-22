@@ -1,21 +1,29 @@
 const Order = require("../model/orderModal");
 const User = require("../model/userModal");
 const Product = require("../model/productModel");
+const Payment = require("../model/paymentModel");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 
 const orderCtrl = {
   //! place order
+
   placeOrders: asyncHandler(async (req, res) => {
-    const { products } = req.body;
-    const userId = req.user.id; // get user ID from request
+    const { products, paymentId, paymentMethod } = req.body;
+
+    const userId = req.user.id;
+
     if (!userId) {
-      return res.status(400).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
-    if (!Array.isArray(products)) {
+
+    if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ message: "Products are required" });
     }
-    // add orders
+
+    let orderIds = [];
+    let totalAmount = 0;
+
     for (let product of products) {
       const order = await Order.create({
         buyerId: userId,
@@ -23,12 +31,52 @@ const orderCtrl = {
         quantity: product.quantity,
         sellerId: product.sellerId,
         status: "pending",
+        paymentType: paymentMethod,
       });
+
+      orderIds.push(order._id);
+
+      // if price sent from frontend
+      if (product.price) {
+        totalAmount += product.price * product.quantity;
+      }
     }
-    return res
-      .status(200)
-      .json({ success: true, message: "Order placed successfully" });
+
+    const payment = await Payment.create({
+      paymentType: paymentMethod,
+      amount: totalAmount,
+      buyerId: userId,
+      orders: orderIds,
+      status: paymentMethod === "Online" ? "completed" : "pending",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Order placed successfully",
+      payment,
+    });
   }),
+
+  //! payment success
+  paymentSuccess: asyncHandler(async (req, res) => {
+    const paymentId = req.query.payment_id;
+    const method = req.query.method;
+
+    // Update payment status if online payment
+    if (paymentId) {
+      await Payment.findOneAndUpdate(
+        { razor_id: paymentId },
+        { status: "completed" },
+        { new: true },
+      );
+    }
+
+    res.render("payment-success", {
+      paymentId: paymentId,
+      paymentMethod: method,
+    });
+  }),
+
   //! get orders
   getOrders: asyncHandler(async (req, res) => {
     const userId = req.user.id; // get user ID from request
@@ -153,6 +201,7 @@ const orderCtrl = {
         },
       },
     ]);
+    console.log(orders);
 
     res.render("buyer-orders", { user: req.user, orders });
   }),
@@ -195,7 +244,6 @@ const orderCtrl = {
       return res.status(403).json({ message: "Forbidden" });
     }
     order.status = "delivered";
-    console.log(order);
 
     await order.save();
     return res
