@@ -24,6 +24,11 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "shipped", "delivered"],
     default: "pending",
   },
+  paymentType: {
+    type: String,
+    enum: ["COD", "Online"],
+    default: "COD",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
